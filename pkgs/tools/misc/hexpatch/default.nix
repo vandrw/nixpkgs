@@ -1,4 +1,12 @@
-{ lib, rustPlatform, fetchFromGitHub, cmake, python3, stdenv, gcc, llvmPackages
+{
+  lib,
+  rustPlatform,
+  fetchFromGitHub,
+  cmake,
+  python3,
+  stdenv,
+  gcc,
+  llvmPackages,
 }:
 
 rustPlatform.buildRustPackage rec {
@@ -14,15 +22,18 @@ rustPlatform.buildRustPackage rec {
 
   cargoHash = "sha256-Bp6+y3ZmkAGxkcz4GJk9tBtglltNPhnGk4lLV9SgDks=";
 
-  nativeBuildInputs = [ cmake python3 ] ++ lib.optionals
-    (stdenv.system == "x86_64-linux" || stdenv.system == "aarch64-linux")
-    [ gcc ] # Linux
-    ++ lib.optionals
-    (stdenv.system == "x86_64-darwin" || stdenv.system == "aarch64-darwin")
-    [ llvmPackages.libclang ] # macOS
-    ++ lib.optionals
-    (stdenv.system == "x86_64-windows" || stdenv.system == "aarch64-windows")
-    [ llvmPackages.libclang ]; # Windows
+  nativeBuildInputs =
+    [
+      cmake
+      python3
+    ]
+    ++ lib.optionals (stdenv.system == "x86_64-linux" || stdenv.system == "aarch64-linux") [ gcc ] # Linux
+    ++ lib.optionals (
+      stdenv.system == "x86_64-darwin"
+      || stdenv.system == "aarch64-darwin"
+      || stdenv.system == "x86_64-windows"
+      || stdenv.system == "aarch64-windows"
+    ) [ llvmPackages.libclang ]; # MacOS and Windows
 
   # Rename the binary from hex-patch to hexpatch
   postFixup = ''
@@ -30,8 +41,7 @@ rustPlatform.buildRustPackage rec {
   '';
 
   meta = with lib; {
-    description =
-      "A binary patcher and editor written in Rust with terminal user interface.";
+    description = "A binary patcher and editor written in Rust with terminal user interface.";
     longDescription = ''
       HexPatch is a binary patcher and editor with terminal user interface (TUI),
       capable of disassembling instructions and assembling patches. It supports a
