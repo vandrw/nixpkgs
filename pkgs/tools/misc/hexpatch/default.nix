@@ -15,7 +15,7 @@ rustPlatform.buildRustPackage rec {
 
   src = fetchFromGitHub {
     owner = "Etto48";
-    repo = pname;
+    repo = "HexPatch";
     rev = "v${version}";
     hash = "sha256-yyYxRJ+o+Z5z7PmjcFCsahRXZ9JHFmGmituzGTxY6ec=";
   };
@@ -27,20 +27,16 @@ rustPlatform.buildRustPackage rec {
       cmake
       python3
     ]
-    ++ lib.optionals (stdenv.system == "x86_64-linux" || stdenv.system == "aarch64-linux") [ gcc ] # Linux
-    ++ lib.optionals (
-      stdenv.system == "x86_64-darwin"
-      || stdenv.system == "aarch64-darwin"
-      || stdenv.system == "x86_64-windows"
-      || stdenv.system == "aarch64-windows"
-    ) [ llvmPackages.libclang ]; # MacOS and Windows
+    ++ lib.optionals stdenv.hostPlatform.isLinux [ gcc ]
+    ++ lib.optionals (stdenv.hostPlatform.isWindows || stdenv.hostPlatform.isDarwin) [
+      llvmPackages.libclang
+    ];
 
-  # Rename the binary from hex-patch to hexpatch
   postFixup = ''
-    mv $out/bin/hex-patch $out/bin/hexpatch
+    ln -s $out/bin/hex-patch $out/bin/hexpatch
   '';
 
-  meta = with lib; {
+  meta = {
     description = "A binary patcher and editor written in Rust with terminal user interface.";
     longDescription = ''
       HexPatch is a binary patcher and editor with terminal user interface (TUI),
@@ -49,8 +45,8 @@ rustPlatform.buildRustPackage rec {
       via SSH.
     '';
     homepage = "https://etto48.github.io/HexPatch/";
-    license = licenses.mit;
-    maintainers = with maintainers; [ Etto48 ];
+    license = lib.licenses.mit;
+    maintainers = with lib.maintainers; [ Etto48 ];
     mainProgram = "hexpatch";
   };
 }
